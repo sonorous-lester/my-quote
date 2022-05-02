@@ -33,9 +33,13 @@ func (uc *RegisterUsecase) Register(user register.NewUser) error {
 		return exceptions.InvalidPasswordLength
 	}
 
-	find, _ := uc.r.FindUser(user.Email)
+	find, err := uc.r.FindUser(user.Email)
 	if find {
 		return exceptions.UserExists
 	}
+	if err != nil {
+		return exceptions.ServerError
+	}
+
 	return nil
 }
