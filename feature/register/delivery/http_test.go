@@ -74,3 +74,20 @@ func (s *RegisterTestSuite) TestRegisterInvalidInput() {
 	json.Unmarshal(s.r.Body.Bytes(), &m)
 	s.Assert().Equal(exceptions.ValidInput.Error(), m.Message)
 }
+
+func (s *RegisterTestSuite) TestRegisterShowInvalidMessage() {
+	newUser := register.NewUser{
+		Email:    "123@",
+		Password: "123456",
+	}
+	body, _ := json.Marshal(newUser)
+	s.uc.On("Register", newUser).Return(exceptions.ValidEmailAddr)
+	NewRegisterHTTPHandler(s.g, s.l, s.uc)
+	req, _ := newTestRequest(http.MethodPost, REGISTER_ENDPOINT, body)
+	s.g.ServeHTTP(s.r, req)
+
+	s.Assert().Equal(http.StatusBadRequest, s.r.Code)
+	var m common.Message
+	json.Unmarshal(s.r.Body.Bytes(), &m)
+	s.Assert().Equal(exceptions.ValidEmailAddr.Error(), m.Message)
+}

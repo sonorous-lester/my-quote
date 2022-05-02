@@ -29,7 +29,12 @@ func (h *handler) register(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, common.Message{Message: exceptions.ValidInput.Error()})
 		return
 	}
+	err = h.registerUc.Register(user)
+	if err != nil {
+		h.logger.Warnf("register user error: %s", err.Error())
+		c.JSON(http.StatusBadRequest, common.Message{Message: err.Error()})
+		return
+	}
 
-	h.registerUc.Register(user)
 	c.Writer.WriteHeader(http.StatusOK)
 }
