@@ -23,5 +23,5 @@ func NewRegisterUsecase(logger domain.Logger, repository register.Repository, pa
 }
 
 func (uc *RegisterUsecase) Register(user register.NewUser) error {
-
+	return nil
 }
