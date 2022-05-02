@@ -28,5 +28,9 @@ func (uc *RegisterUsecase) Register(user register.NewUser) error {
 		uc.l.Debugf("invalid email addr: %s", user.Email)
 		return exceptions.InvalidEmailAddr
 	}
+	if !uc.pv.Validate(user.Password) {
+		uc.l.Debugf("invalid password length: %d", len(user.Password))
+		return exceptions.InvalidPasswordLength
+	}
 	return nil
 }
