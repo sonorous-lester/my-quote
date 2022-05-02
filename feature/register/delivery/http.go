@@ -26,7 +26,7 @@ func (h *handler) register(c *gin.Context) {
 	err := c.Bind(&user)
 	if err != nil {
 		h.logger.Debugf("Convert new user json error: %s", err.Error())
-		c.JSON(http.StatusBadRequest, common.Message{Message: exceptions.ValidInput.Error()})
+		c.JSON(http.StatusBadRequest, common.Message{Message: exceptions.InvalidInput.Error()})
 		return
 	}
 	err = h.registerUc.Register(user)
