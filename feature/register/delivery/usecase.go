@@ -3,6 +3,7 @@ package delivery
 import (
 	"myquote/domain"
 	"myquote/domain/common"
+	"myquote/domain/exceptions"
 	"myquote/domain/register"
 )
 
@@ -23,5 +24,9 @@ func NewRegisterUsecase(logger domain.Logger, repository register.Repository, pa
 }
 
 func (uc *RegisterUsecase) Register(user register.NewUser) error {
+	if !uc.ev.Validate(user.Email) {
+		uc.l.Debugf("invalid email addr: %s", user.Email)
+		return exceptions.InvalidEmailAddr
+	}
 	return nil
 }
