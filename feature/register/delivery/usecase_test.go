@@ -92,3 +92,16 @@ func (s *RegisterUsecaseTestSuite) TestRegisterUserExists() {
 
 	s.Assert().Equal(exceptions.UserExists, err)
 }
+
+func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerError() {
+	user := register.NewUser{
+		Email:    "123@gmail.com",
+		Password: "dfadfjklf",
+	}
+	s.ev.On("Validate", user.Email).Return(true)
+	s.pv.On("Validate", user.Password).Return(true)
+	s.repo.On("FindUser", user.Email).Return(false, exceptions.ServerError)
+	err := s.uc.Register(user)
+
+	s.Assert().Equal(exceptions.ServerError, err)
+}
