@@ -7,6 +7,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"myquote/domain"
+	"myquote/domain/common"
+	"myquote/domain/exceptions"
 	"myquote/domain/register"
 	"myquote/service/logger"
 	"net/http"
@@ -66,6 +68,9 @@ func (s *RegisterTestSuite) TestRegisterInvalidInput() {
 	NewRegisterHTTPHandler(s.g, s.l, s.uc)
 	req, _ := newTestRequest(http.MethodPost, REGISTER_ENDPOINT, nil)
 	s.g.ServeHTTP(s.r, req)
+
 	s.Assert().Equal(http.StatusBadRequest, s.r.Code)
-	s.Assert().Equal("{\"message\":\"invalid input\"}", s.r.Body.String())
+	var m common.Message
+	json.Unmarshal(s.r.Body.Bytes(), &m)
+	s.Assert().Equal(exceptions.ValidInput.Error(), m.Message)
 }

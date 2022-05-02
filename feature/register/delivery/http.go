@@ -3,6 +3,8 @@ package delivery
 import (
 	"github.com/gin-gonic/gin"
 	"myquote/domain"
+	"myquote/domain/common"
+	"myquote/domain/exceptions"
 	"myquote/domain/register"
 	"net/http"
 )
@@ -24,7 +26,7 @@ func (h *handler) register(c *gin.Context) {
 	err := c.Bind(&user)
 	if err != nil {
 		h.logger.Debugf("Convert new user json error: %s", err.Error())
-		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid input"})
+		c.JSON(http.StatusBadRequest, common.Message{Message: exceptions.ValidInput.Error()})
 		return
 	}
 
