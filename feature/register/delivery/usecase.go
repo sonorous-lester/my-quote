@@ -32,7 +32,9 @@ func (uc *RegisterUsecase) Register(user register.NewUser) error {
 		uc.l.Debugf("invalid password length: %d", len(user.Password))
 		return exceptions.InvalidPasswordLength
 	}
-	if uc.r.Find(user.Email) {
+
+	find, _ := uc.r.FindUser(user.Email)
+	if find {
 		return exceptions.UserExists
 	}
 	return nil

@@ -1,5 +1,5 @@
 package register
 
 type Repository interface {
-	Find(email string) bool
+	FindUser(email string) (bool, error)
 }

@@ -13,9 +13,9 @@ type MockedRegisterRepo struct {
 	mock.Mock
 }
 
-func (m *MockedRegisterRepo) Find(email string) bool {
+func (m *MockedRegisterRepo) FindUser(email string) (bool, error) {
 	args := m.Called(email)
-	return args.Bool(0)
+	return args.Bool(0), args.Error(1)
 }
 
 type MockedEmailValidator struct {
@@ -87,7 +87,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterUserExists() {
 	}
 	s.ev.On("Validate", user.Email).Return(true)
 	s.pv.On("Validate", user.Password).Return(true)
-	s.repo.On("Find", user.Email).Return(true)
+	s.repo.On("FindUser", user.Email).Return(true, nil)
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.UserExists, err)
