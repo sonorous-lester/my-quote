@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"myquote/domain"
 	"myquote/domain/register"
+	"net/http"
 )
 
 type handler struct {
@@ -17,6 +18,8 @@ func NewRegisterHTTPHandler(c *gin.Engine, l domain.Logger, uc register.Usecase)
 }
 
 func (h *handler) register(c *gin.Context) {
-
+	var user register.NewUser
+	c.Bind(&user)
+	h.registerUc.Register(user)
+	c.Writer.WriteHeader(http.StatusOK)
 }
-
