@@ -19,7 +19,13 @@ func NewRegisterHTTPHandler(c *gin.Engine, l domain.Logger, uc register.Usecase)
 
 func (h *handler) register(c *gin.Context) {
 	var user register.NewUser
-	c.Bind(&user)
+	err := c.Bind(&user)
+	if err != nil {
+		h.logger.Debugf("Convert new user json error: %s", err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"message": "invalid input"})
+		return
+	}
+
 	h.registerUc.Register(user)
 	c.Writer.WriteHeader(http.StatusOK)
 }
