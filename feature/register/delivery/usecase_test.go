@@ -79,3 +79,16 @@ func (s *RegisterUsecaseTestSuite) TestRegisterInvalidPasswordLength() {
 
 	s.Assert().Equal(exceptions.InvalidPasswordLength, err)
 }
+
+func (s *RegisterUsecaseTestSuite) TestRegisterUserExists() {
+	user := register.NewUser{
+		Email:    "123@gmail.com",
+		Password: "dfadfjklf",
+	}
+	s.ev.On("Validate", user.Email).Return(true)
+	s.pv.On("Validate", user.Password).Return(true)
+	s.repo.On("Find", user.Email).Return(true)
+	err := s.uc.Register(user)
+
+	s.Assert().Equal(exceptions.UserExists, err)
+}
