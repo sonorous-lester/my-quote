@@ -12,9 +12,11 @@ type handler struct {
 	registerUc register.Usecase
 }
 
+const REGISTER_ENDPOINT = "/api/register"
+
 func NewRegisterHTTPHandler(c *gin.Engine, l domain.Logger, uc register.Usecase) {
 	handler := &handler{logger: l, registerUc: uc}
-	c.POST("/api/register", handler.register)
+	c.POST(REGISTER_ENDPOINT, handler.register)
 }
 
 func (h *handler) register(c *gin.Context) {
