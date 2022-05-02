@@ -13,6 +13,11 @@ type MockedRegisterRepo struct {
 	mock.Mock
 }
 
+func (m *MockedRegisterRepo) Register(email string, password string) error {
+	args := m.Called(email, password)
+	return args.Error(0)
+}
+
 func (m *MockedRegisterRepo) FindUser(email string) (bool, error) {
 	args := m.Called(email)
 	return args.Bool(0), args.Error(1)
@@ -101,6 +106,20 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerError() {
 	s.ev.On("Validate", user.Email).Return(true)
 	s.pv.On("Validate", user.Password).Return(true)
 	s.repo.On("FindUser", user.Email).Return(false, exceptions.ServerError)
+	err := s.uc.Register(user)
+
+	s.Assert().Equal(exceptions.ServerError, err)
+}
+
+func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure() {
+	user := register.NewUser{
+		Email:    "123@gmail.com",
+		Password: "dfadfjklf",
+	}
+	s.ev.On("Validate", user.Email).Return(true)
+	s.pv.On("Validate", user.Password).Return(true)
+	s.repo.On("FindUser", user.Email).Return(false, nil)
+	s.repo.On("Register", user.Email, user.Password).Return(exceptions.ServerError)
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.ServerError, err)
