@@ -31,6 +31,10 @@ type RegisterTestSuite struct {
 	r  *httptest.ResponseRecorder
 }
 
+func TestRegisterHTTPHandler(t *testing.T) {
+	suite.Run(t, new(RegisterTestSuite))
+}
+
 func (s *RegisterTestSuite) SetupTest() {
 	s.uc = new(MockedRegisterUsecase)
 	s.l = logger.NewLogger("")
@@ -52,6 +56,12 @@ func (s *RegisterTestSuite) TestRegisterSuccess() {
 	s.Assert().Equal(http.StatusOK, s.r.Code)
 }
 
-func TestRegisterHTTPHandler(t *testing.T) {
-	suite.Run(t, new(RegisterTestSuite))
+func (s *RegisterTestSuite) TestRegisterInvalidInput() {
+	s.uc.On("Register", nil).Return(nil)
+	NewRegisterHTTPHandler(s.g, s.l, s.uc)
+	req, _ := http.NewRequest(http.MethodPost, "/api/register", nil)
+	req.Header.Set("Content-Type", "application/json")
+	s.g.ServeHTTP(s.r, req)
+	s.Assert().Equal(http.StatusBadRequest, s.r.Code)
+	s.Assert().Equal("{\"message\":\"invalid input\"}", s.r.Body.String())
 }
