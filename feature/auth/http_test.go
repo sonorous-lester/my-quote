@@ -157,3 +157,21 @@ func (s *AuthTestSuite) TestLoginShowBadRequestException() {
 	s.Assert().Equal(http.StatusBadRequest, s.r.Code)
 	s.Assert().Equal(exceptions.AuthError.Error(), m.Message)
 }
+
+func (s *AuthTestSuite) TestLoginShowServerErrorException() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	body, _ := json.Marshal(info)
+
+	s.uc.On("Login", info).Return(models.User{}, exceptions.ServerError)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
+	req, _ := newTestRequest(http.MethodPost, LOGIN_ENDPOINT, body)
+	s.g.ServeHTTP(s.r, req)
+
+	var m common.Message
+	json.Unmarshal(s.r.Body.Bytes(), &m)
+	s.Assert().Equal(http.StatusInternalServerError, s.r.Code)
+	s.Assert().Equal(exceptions.ServerError.Error(), m.Message)
+}
