@@ -15,10 +15,12 @@ type handler struct {
 }
 
 const REGISTER_ENDPOINT = "/api/auth"
+const LOGIN_ENDPOINT = "/api/login"
 
 func NewAuthHTTPHandler(c *gin.Engine, l domain.Logger, uc auth.Usecase) {
 	handler := &handler{logger: l, registerUc: uc}
 	c.POST(REGISTER_ENDPOINT, handler.register)
+	c.POST(LOGIN_ENDPOINT, handler.login)
 }
 
 func (h *handler) register(c *gin.Context) {
@@ -37,4 +39,8 @@ func (h *handler) register(c *gin.Context) {
 	}
 
 	c.Writer.WriteHeader(http.StatusOK)
+}
+
+func (h *handler) login(c *gin.Context) {
+
 }

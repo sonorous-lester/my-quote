@@ -5,6 +5,7 @@ import (
 	"myquote/domain/auth"
 	"myquote/domain/common"
 	"myquote/domain/exceptions"
+	"myquote/domain/models"
 )
 
 type Usecase struct {
@@ -55,4 +56,9 @@ func (uc *Usecase) Register(user auth.NewUser) error {
 	}
 
 	return nil
+}
+
+func (uc *Usecase) Login(i auth.LoginInfo) (models.User, error) {
+	//TODO implement me
+	panic("implement me")
 }

@@ -10,10 +10,12 @@ import (
 	"myquote/domain/auth"
 	"myquote/domain/common"
 	"myquote/domain/exceptions"
+	"myquote/domain/models"
 	"myquote/service/logger"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 type MockedAuthUsecase struct {
@@ -23,6 +25,11 @@ type MockedAuthUsecase struct {
 func (m *MockedAuthUsecase) Register(user auth.NewUser) error {
 	args := m.Called(user)
 	return args.Error(0)
+}
+
+func (m *MockedAuthUsecase) Login(i auth.LoginInfo) (models.User, error) {
+	args := m.Called(i)
+	return args.Get(0).(models.User), args.Error(1)
 }
 
 type AuthTestSuite struct {
@@ -90,4 +97,33 @@ func (s *AuthTestSuite) TestRegisterShowInvalidMessage() {
 	var m common.Message
 	json.Unmarshal(s.r.Body.Bytes(), &m)
 	s.Assert().Equal(exceptions.InvalidEmailAddr.Error(), m.Message)
+}
+
+func (s *AuthTestSuite) TestLoginSuccess() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	body, _ := json.Marshal(info)
+
+	user := models.User{
+		ID:        1,
+		Name:      "Lester",
+		Email:     "123@gmail.com",
+		Token:     "secret token",
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+	}
+
+	s.uc.On("Login", info).Return(user)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
+	req, _ := newTestRequest(http.MethodPost, LOGIN_ENDPOINT, body)
+	s.g.ServeHTTP(s.r, req)
+
+	var u models.User
+	json.Unmarshal(s.r.Body.Bytes(), &u)
+	s.Assert().Equal(http.StatusOK, s.r.Code)
+	s.Assert().Equal(user.Name, u.Name)
+	s.Assert().Equal(user.Email, u.Email)
+	s.Assert().Equal(user.Token, u.Token)
 }
