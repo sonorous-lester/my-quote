@@ -49,6 +49,11 @@ func (h *handler) login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, common.Message{Message: exceptions.InvalidInput.Error()})
 		return
 	}
-	user, _ := h.registerUc.Login(info)
+	user, err := h.registerUc.Login(info)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, common.Message{Message: err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusOK, user)
 }
