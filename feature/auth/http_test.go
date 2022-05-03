@@ -127,3 +127,15 @@ func (s *AuthTestSuite) TestLoginSuccess() {
 	s.Assert().Equal(user.Email, u.Email)
 	s.Assert().Equal(user.Token, u.Token)
 }
+
+func (s *AuthTestSuite) TestShowLoginInvalidInputException() {
+	s.uc.On("Login", mock.Anything).Return(models.User{}, nil)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
+	req, _ := newTestRequest(http.MethodPost, LOGIN_ENDPOINT, nil)
+	s.g.ServeHTTP(s.r, req)
+
+	var m common.Message
+	json.Unmarshal(s.r.Body.Bytes(), &m)
+	s.Assert().Equal(http.StatusBadRequest, s.r.Code)
+	s.Assert().Equal(exceptions.InvalidInput.Error(), m.Message)
+}
