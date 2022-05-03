@@ -115,7 +115,7 @@ func (s *AuthTestSuite) TestLoginSuccess() {
 		UpdatedAt: time.Time{},
 	}
 
-	s.uc.On("Login", info).Return(user)
+	s.uc.On("Login", info).Return(user, nil)
 	NewAuthHTTPHandler(s.g, s.l, s.uc)
 	req, _ := newTestRequest(http.MethodPost, LOGIN_ENDPOINT, body)
 	s.g.ServeHTTP(s.r, req)

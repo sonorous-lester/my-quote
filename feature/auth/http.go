@@ -42,5 +42,8 @@ func (h *handler) register(c *gin.Context) {
 }
 
 func (h *handler) login(c *gin.Context) {
-
+	var info auth.LoginInfo
+	c.Bind(&info)
+	user, _ := h.registerUc.Login(info)
+	c.JSON(http.StatusOK, user)
 }
