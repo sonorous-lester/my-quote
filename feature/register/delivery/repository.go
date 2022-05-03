@@ -30,7 +30,12 @@ func (r *Repository) FindUser(email string) (bool, error) {
 	return true, nil
 }
 
-func (r *Repository) Register(email string, password string) error {
-	//TODO implement me
-	panic("implement me")
+func (r *Repository) Register(name string, email string, password string) error {
+	user := models.UserModel{Name: name, Email: email, Password: password}
+	result := r.db.Create(&user)
+	if result.Error != nil {
+		r.l.Debugf("create user error; username: %s, email: %s\n The error message: %s", name, email, result.Error.Error())
+		return result.Error
+	}
+	return nil
 }
