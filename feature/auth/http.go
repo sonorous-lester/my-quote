@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"myquote/domain"
 	"myquote/domain/auth"
@@ -50,6 +51,11 @@ func (h *handler) login(c *gin.Context) {
 		return
 	}
 	user, err := h.registerUc.Login(info)
+	if err != nil && errors.Is(err, exceptions.ServerError) {
+		c.JSON(http.StatusInternalServerError, common.Message{Message: err.Error()})
+		return
+	}
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, common.Message{Message: err.Error()})
 		return
