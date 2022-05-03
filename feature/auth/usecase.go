@@ -60,7 +60,13 @@ func (uc *Usecase) Register(user auth.NewUser) error {
 
 func (uc *Usecase) Login(i auth.LoginInfo) (models.User, error) {
 	// check user exist
+	find, _, _ := uc.r.FindUser(i.Email)
+	if !find {
+		uc.l.Warnf("not found user. email: %s", i.Email)
+		return models.User{}, exceptions.UserNotExists
+	}
 	// compare password & hash
 	// generate token & updated to the Db
 	// return User
+	return models.User{}, nil
 }
