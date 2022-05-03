@@ -164,6 +164,7 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowUserNotExistException() {
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
+	s.repo.On("FindUser", info.Email).Return(false, models.UserModel{}, exceptions.UserNotExists)
 	_, err := s.uc.Login(info)
 	s.Assert().Equal(exceptions.UserNotExists, err)
 }
