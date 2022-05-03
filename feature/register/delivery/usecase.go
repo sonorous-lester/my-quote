@@ -49,7 +49,7 @@ func (uc *RegisterUsecase) Register(user register.NewUser) error {
 		return exceptions.ServerError
 	}
 
-	err = uc.r.Register(user.Email, hash)
+	err = uc.r.Register(user.Name, user.Email, hash)
 	if err != nil {
 		return exceptions.ServerError
 	}

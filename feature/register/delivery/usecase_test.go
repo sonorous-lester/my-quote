@@ -13,8 +13,8 @@ type MockedRegisterRepo struct {
 	mock.Mock
 }
 
-func (m *MockedRegisterRepo) Register(email string, password string) error {
-	args := m.Called(email, password)
+func (m *MockedRegisterRepo) Register(name string, email string, password string) error {
+	args := m.Called(name, email, password)
 	return args.Error(0)
 }
 
@@ -136,7 +136,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailu
 	s.pv.On("Validate", user.Password).Return(true)
 	s.repo.On("FindUser", user.Email).Return(false, nil)
 	s.hashv.On("Hash", user.Password).Return("", exceptions.ServerError)
-	s.repo.On("Register", user.Email, user.Password).Return(nil)
+	s.repo.On("Register", user.Name, user.Email, user.Password).Return(nil)
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.ServerError, err)
@@ -152,7 +152,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailu
 	s.pv.On("Validate", user.Password).Return(true)
 	s.repo.On("FindUser", user.Email).Return(false, nil)
 	s.hashv.On("Hash", user.Password).Return(hash, nil)
-	s.repo.On("Register", user.Email, hash).Return(exceptions.ServerError)
+	s.repo.On("Register", user.Name, user.Email, hash).Return(exceptions.ServerError)
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.ServerError, err)
