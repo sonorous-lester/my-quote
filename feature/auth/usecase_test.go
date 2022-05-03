@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"myquote/domain/auth"
 	"myquote/domain/exceptions"
+	"myquote/domain/models"
 	"myquote/service/logger"
 	"testing"
 )
@@ -18,9 +19,9 @@ func (m *MockedAuthRepo) Register(name string, email string, password string) er
 	return args.Error(0)
 }
 
-func (m *MockedAuthRepo) FindUser(email string) (bool, error) {
+func (m *MockedAuthRepo) FindUser(email string) (bool, models.UserModel, error) {
 	args := m.Called(email)
-	return args.Bool(0), args.Error(1)
+	return args.Bool(0), args.Get(1).(models.UserModel), args.Error(2)
 }
 
 type MockedEmailValidator struct {
@@ -108,7 +109,7 @@ func (s *AuthUsecaseTestSuite) TestRegisterUserExists() {
 	}
 	s.ev.On("Validate", user.Email).Return(true)
 	s.pv.On("Validate", user.Password).Return(true)
-	s.repo.On("FindUser", user.Email).Return(true, nil)
+	s.repo.On("FindUser", user.Email).Return(true, models.UserModel{}, nil)
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.UserExists, err)
@@ -121,7 +122,7 @@ func (s *AuthUsecaseTestSuite) TestRegisterThrowServerError() {
 	}
 	s.ev.On("Validate", user.Email).Return(true)
 	s.pv.On("Validate", user.Password).Return(true)
-	s.repo.On("FindUser", user.Email).Return(false, exceptions.ServerError)
+	s.repo.On("FindUser", user.Email).Return(false, models.UserModel{}, exceptions.ServerError)
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.ServerError, err)
@@ -134,7 +135,7 @@ func (s *AuthUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailure()
 	}
 	s.ev.On("Validate", user.Email).Return(true)
 	s.pv.On("Validate", user.Password).Return(true)
-	s.repo.On("FindUser", user.Email).Return(false, nil)
+	s.repo.On("FindUser", user.Email).Return(false, models.UserModel{}, nil)
 	s.hashv.On("Hash", user.Password).Return("", exceptions.ServerError)
 	s.repo.On("Register", user.Name, user.Email, user.Password).Return(nil)
 	err := s.uc.Register(user)
@@ -150,7 +151,7 @@ func (s *AuthUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure()
 	hash := "hashresult"
 	s.ev.On("Validate", user.Email).Return(true)
 	s.pv.On("Validate", user.Password).Return(true)
-	s.repo.On("FindUser", user.Email).Return(false, nil)
+	s.repo.On("FindUser", user.Email).Return(false, models.UserModel{}, nil)
 	s.hashv.On("Hash", user.Password).Return(hash, nil)
 	s.repo.On("Register", user.Name, user.Email, hash).Return(exceptions.ServerError)
 	err := s.uc.Register(user)
