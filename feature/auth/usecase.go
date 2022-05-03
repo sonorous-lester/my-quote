@@ -1,22 +1,22 @@
-package delivery
+package auth
 
 import (
 	"myquote/domain"
+	"myquote/domain/auth"
 	"myquote/domain/common"
 	"myquote/domain/exceptions"
-	"myquote/domain/register"
 )
 
-type RegisterUsecase struct {
+type Usecase struct {
 	l     domain.Logger
-	r     register.Repository
+	r     auth.Repository
 	pv    common.Validator
 	ev    common.Validator
 	hashv common.HashValidator
 }
 
-func NewRegisterUsecase(logger domain.Logger, repository register.Repository, passwordValidator common.Validator, emailValidator common.Validator, hashValidator common.HashValidator) *RegisterUsecase {
-	return &RegisterUsecase{
+func NewUsecase(logger domain.Logger, repository auth.Repository, passwordValidator common.Validator, emailValidator common.Validator, hashValidator common.HashValidator) *Usecase {
+	return &Usecase{
 		l:     logger,
 		r:     repository,
 		pv:    passwordValidator,
@@ -25,7 +25,7 @@ func NewRegisterUsecase(logger domain.Logger, repository register.Repository, pa
 	}
 }
 
-func (uc *RegisterUsecase) Register(user register.NewUser) error {
+func (uc *Usecase) Register(user auth.NewUser) error {
 	if !uc.ev.Validate(user.Email) {
 		uc.l.Debugf("invalid email addr: %s", user.Email)
 		return exceptions.InvalidEmailAddr

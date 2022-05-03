@@ -1,4 +1,4 @@
-package delivery
+package auth
 
 import (
 	"bytes"
@@ -7,38 +7,38 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"myquote/domain"
+	"myquote/domain/auth"
 	"myquote/domain/common"
 	"myquote/domain/exceptions"
-	"myquote/domain/register"
 	"myquote/service/logger"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-type MockedRegisterUsecase struct {
+type MockedAuthUsecase struct {
 	mock.Mock
 }
 
-func (m *MockedRegisterUsecase) Register(user register.NewUser) error {
+func (m *MockedAuthUsecase) Register(user auth.NewUser) error {
 	args := m.Called(user)
 	return args.Error(0)
 }
 
-type RegisterTestSuite struct {
+type AuthTestSuite struct {
 	suite.Suite
-	uc *MockedRegisterUsecase
+	uc *MockedAuthUsecase
 	l  domain.Logger
 	g  *gin.Engine
 	r  *httptest.ResponseRecorder
 }
 
-func TestRegisterHTTPHandler(t *testing.T) {
-	suite.Run(t, new(RegisterTestSuite))
+func TestAuthHTTPHandler(t *testing.T) {
+	suite.Run(t, new(AuthTestSuite))
 }
 
-func (s *RegisterTestSuite) SetupTest() {
-	s.uc = new(MockedRegisterUsecase)
+func (s *AuthTestSuite) SetupTest() {
+	s.uc = new(MockedAuthUsecase)
 	s.l = logger.NewLogger("")
 	s.g = gin.Default()
 	s.r = httptest.NewRecorder()
@@ -50,22 +50,22 @@ func newTestRequest(method string, endpoint string, body []byte) (*http.Request,
 	return req, err
 }
 
-func (s *RegisterTestSuite) TestRegisterSuccess() {
-	newUser := register.NewUser{
+func (s *AuthTestSuite) TestRegisterSuccess() {
+	newUser := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
 	body, _ := json.Marshal(newUser)
 	s.uc.On("Register", newUser).Return(nil)
-	NewRegisterHTTPHandler(s.g, s.l, s.uc)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
 	req, _ := newTestRequest(http.MethodPost, REGISTER_ENDPOINT, body)
 	s.g.ServeHTTP(s.r, req)
 	s.Assert().Equal(http.StatusOK, s.r.Code)
 }
 
-func (s *RegisterTestSuite) TestRegisterInvalidInput() {
+func (s *AuthTestSuite) TestRegisterInvalidInput() {
 	s.uc.On("Register", nil).Return(nil)
-	NewRegisterHTTPHandler(s.g, s.l, s.uc)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
 	req, _ := newTestRequest(http.MethodPost, REGISTER_ENDPOINT, nil)
 	s.g.ServeHTTP(s.r, req)
 
@@ -75,14 +75,14 @@ func (s *RegisterTestSuite) TestRegisterInvalidInput() {
 	s.Assert().Equal(exceptions.InvalidInput.Error(), m.Message)
 }
 
-func (s *RegisterTestSuite) TestRegisterShowInvalidMessage() {
-	newUser := register.NewUser{
+func (s *AuthTestSuite) TestRegisterShowInvalidMessage() {
+	newUser := auth.NewUser{
 		Email:    "123@",
 		Password: "123456",
 	}
 	body, _ := json.Marshal(newUser)
 	s.uc.On("Register", newUser).Return(exceptions.InvalidEmailAddr)
-	NewRegisterHTTPHandler(s.g, s.l, s.uc)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
 	req, _ := newTestRequest(http.MethodPost, REGISTER_ENDPOINT, body)
 	s.g.ServeHTTP(s.r, req)
 

@@ -1,28 +1,28 @@
-package delivery
+package auth
 
 import (
 	"github.com/gin-gonic/gin"
 	"myquote/domain"
+	"myquote/domain/auth"
 	"myquote/domain/common"
 	"myquote/domain/exceptions"
-	"myquote/domain/register"
 	"net/http"
 )
 
 type handler struct {
 	logger     domain.Logger
-	registerUc register.Usecase
+	registerUc auth.Usecase
 }
 
-const REGISTER_ENDPOINT = "/api/register"
+const REGISTER_ENDPOINT = "/api/auth"
 
-func NewRegisterHTTPHandler(c *gin.Engine, l domain.Logger, uc register.Usecase) {
+func NewAuthHTTPHandler(c *gin.Engine, l domain.Logger, uc auth.Usecase) {
 	handler := &handler{logger: l, registerUc: uc}
 	c.POST(REGISTER_ENDPOINT, handler.register)
 }
 
 func (h *handler) register(c *gin.Context) {
-	var user register.NewUser
+	var user auth.NewUser
 	err := c.Bind(&user)
 	if err != nil {
 		h.logger.Debugf("Convert new user json error: %s", err.Error())
@@ -31,7 +31,7 @@ func (h *handler) register(c *gin.Context) {
 	}
 	err = h.registerUc.Register(user)
 	if err != nil {
-		h.logger.Warnf("register user error: %s", err.Error())
+		h.logger.Warnf("auth user error: %s", err.Error())
 		c.JSON(http.StatusBadRequest, common.Message{Message: err.Error()})
 		return
 	}

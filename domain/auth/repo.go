@@ -1,4 +1,4 @@
-package register
+package auth
 
 type Repository interface {
 	FindUser(email string) (bool, error)

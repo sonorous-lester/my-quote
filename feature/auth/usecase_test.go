@@ -1,10 +1,10 @@
-package delivery
+package auth
 
 import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
+	"myquote/domain/auth"
 	"myquote/domain/exceptions"
-	"myquote/domain/register"
 	"myquote/service/logger"
 	"testing"
 )
@@ -57,7 +57,7 @@ func (m *MockedHashValidator) Compare(s string, h string) bool {
 
 type RegisterUsecaseTestSuite struct {
 	suite.Suite
-	uc    register.Usecase
+	uc    auth.Usecase
 	repo  *MockedRegisterRepo
 	pv    *MockedPasswordValidator
 	ev    *MockedEmailValidator
@@ -74,11 +74,11 @@ func (s *RegisterUsecaseTestSuite) SetupTest() {
 	s.pv = new(MockedPasswordValidator)
 	s.ev = new(MockedEmailValidator)
 	s.hashv = new(MockedHashValidator)
-	s.uc = NewRegisterUsecase(l, s.repo, s.pv, s.ev, s.hashv)
+	s.uc = NewUsecase(l, s.repo, s.pv, s.ev, s.hashv)
 }
 
 func (s *RegisterUsecaseTestSuite) TestRegisterInvalidEmailAddr() {
-	user := register.NewUser{
+	user := auth.NewUser{
 		Email:    "123jkljl",
 		Password: "dfadfjkladsf",
 	}
@@ -90,7 +90,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterInvalidEmailAddr() {
 }
 
 func (s *RegisterUsecaseTestSuite) TestRegisterInvalidPasswordLength() {
-	user := register.NewUser{
+	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklfdasfdsfadsfadsf",
 	}
@@ -102,7 +102,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterInvalidPasswordLength() {
 }
 
 func (s *RegisterUsecaseTestSuite) TestRegisterUserExists() {
-	user := register.NewUser{
+	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
 	}
@@ -115,7 +115,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterUserExists() {
 }
 
 func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerError() {
-	user := register.NewUser{
+	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
 	}
@@ -128,7 +128,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerError() {
 }
 
 func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailure() {
-	user := register.NewUser{
+	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
 	}
@@ -143,7 +143,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailu
 }
 
 func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure() {
-	user := register.NewUser{
+	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
 	}

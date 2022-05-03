@@ -1,4 +1,4 @@
-package register
+package auth
 
 type NewUser struct {
 	Name     string `json:"name"`
