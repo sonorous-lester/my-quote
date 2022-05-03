@@ -43,7 +43,12 @@ func (h *handler) register(c *gin.Context) {
 
 func (h *handler) login(c *gin.Context) {
 	var info auth.LoginInfo
-	c.Bind(&info)
+	err := c.Bind(&info)
+	if err != nil {
+		h.logger.Debugf("Convert login info json error: %s", err.Error())
+		c.JSON(http.StatusBadRequest, common.Message{Message: exceptions.InvalidInput.Error()})
+		return
+	}
 	user, _ := h.registerUc.Login(info)
 	c.JSON(http.StatusOK, user)
 }
