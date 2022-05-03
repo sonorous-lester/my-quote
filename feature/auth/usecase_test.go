@@ -178,3 +178,16 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowUserServerErrorException() {
 	_, err := s.uc.Login(info)
 	s.Assert().Equal(exceptions.ServerError, err)
 }
+
+func (s *AuthUsecaseTestSuite) TestLoginThrowAuthErrorException() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	user := models.UserModel{Password: "this is a hash"}
+
+	s.repo.On("FindUser", info.Email).Return(true, user, nil)
+	s.hashv.On("Compare", info.Password, user.Password).Return(false)
+	_, err := s.uc.Login(info)
+	s.Assert().Equal(exceptions.AuthError, err)
+}
