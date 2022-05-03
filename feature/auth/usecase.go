@@ -59,19 +59,21 @@ func (uc *Usecase) Register(user auth.NewUser) error {
 }
 
 func (uc *Usecase) Login(i auth.LoginInfo) (models.User, error) {
-	// check user exist
-	find, _, err := uc.r.FindUser(i.Email)
+	find, user, err := uc.r.FindUser(i.Email)
 	if !find {
 		uc.l.Warnf("not found user. email: %s", i.Email)
 		return models.User{}, exceptions.UserNotExists
 	}
-
 	if err != nil {
 		uc.l.Debugf("find user error when user login.\n message: %s", err.Error())
 		return models.User{}, exceptions.ServerError
 	}
-
-	// compare password & hash
+	//compare password & hash
+	matched := uc.hashv.Compare(i.Password, user.Password)
+	if !matched {
+		uc.l.Warnf("user(%s)'s password hash is not matched.", i.Email)
+		return models.User{}, exceptions.AuthError
+	}
 	// generate token & updated to the Db
 	// return User
 	return models.User{}, nil
