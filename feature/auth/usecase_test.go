@@ -9,16 +9,16 @@ import (
 	"testing"
 )
 
-type MockedRegisterRepo struct {
+type MockedAuthRepo struct {
 	mock.Mock
 }
 
-func (m *MockedRegisterRepo) Register(name string, email string, password string) error {
+func (m *MockedAuthRepo) Register(name string, email string, password string) error {
 	args := m.Called(name, email, password)
 	return args.Error(0)
 }
 
-func (m *MockedRegisterRepo) FindUser(email string) (bool, error) {
+func (m *MockedAuthRepo) FindUser(email string) (bool, error) {
 	args := m.Called(email)
 	return args.Bool(0), args.Error(1)
 }
@@ -55,29 +55,29 @@ func (m *MockedHashValidator) Compare(s string, h string) bool {
 	return args.Bool(0)
 }
 
-type RegisterUsecaseTestSuite struct {
+type AuthUsecaseTestSuite struct {
 	suite.Suite
 	uc    auth.Usecase
-	repo  *MockedRegisterRepo
+	repo  *MockedAuthRepo
 	pv    *MockedPasswordValidator
 	ev    *MockedEmailValidator
 	hashv *MockedHashValidator
 }
 
-func TestNewRegisterUsecase(t *testing.T) {
-	suite.Run(t, new(RegisterUsecaseTestSuite))
+func TestNewAuthUsecase(t *testing.T) {
+	suite.Run(t, new(AuthUsecaseTestSuite))
 }
 
-func (s *RegisterUsecaseTestSuite) SetupTest() {
+func (s *AuthUsecaseTestSuite) SetupTest() {
 	l := logger.NewLogger("")
-	s.repo = new(MockedRegisterRepo)
+	s.repo = new(MockedAuthRepo)
 	s.pv = new(MockedPasswordValidator)
 	s.ev = new(MockedEmailValidator)
 	s.hashv = new(MockedHashValidator)
 	s.uc = NewUsecase(l, s.repo, s.pv, s.ev, s.hashv)
 }
 
-func (s *RegisterUsecaseTestSuite) TestRegisterInvalidEmailAddr() {
+func (s *AuthUsecaseTestSuite) TestRegisterInvalidEmailAddr() {
 	user := auth.NewUser{
 		Email:    "123jkljl",
 		Password: "dfadfjkladsf",
@@ -89,7 +89,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterInvalidEmailAddr() {
 	s.Assert().Equal(exceptions.InvalidEmailAddr, err)
 }
 
-func (s *RegisterUsecaseTestSuite) TestRegisterInvalidPasswordLength() {
+func (s *AuthUsecaseTestSuite) TestRegisterInvalidPasswordLength() {
 	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklfdasfdsfadsfadsf",
@@ -101,7 +101,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterInvalidPasswordLength() {
 	s.Assert().Equal(exceptions.InvalidPasswordLength, err)
 }
 
-func (s *RegisterUsecaseTestSuite) TestRegisterUserExists() {
+func (s *AuthUsecaseTestSuite) TestRegisterUserExists() {
 	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
@@ -114,7 +114,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterUserExists() {
 	s.Assert().Equal(exceptions.UserExists, err)
 }
 
-func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerError() {
+func (s *AuthUsecaseTestSuite) TestRegisterThrowServerError() {
 	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
@@ -127,7 +127,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerError() {
 	s.Assert().Equal(exceptions.ServerError, err)
 }
 
-func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailure() {
+func (s *AuthUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailure() {
 	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
@@ -142,7 +142,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailu
 	s.Assert().Equal(exceptions.ServerError, err)
 }
 
-func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure() {
+func (s *AuthUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure() {
 	user := auth.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
@@ -156,4 +156,13 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailu
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.ServerError, err)
+}
+
+func (s *AuthUsecaseTestSuite) TestLoginThrowUserNotExistException() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	_, err := s.uc.Login(info)
+	s.Assert().Equal(exceptions.UserNotExists, err)
 }

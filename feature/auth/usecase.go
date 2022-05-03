@@ -59,6 +59,8 @@ func (uc *Usecase) Register(user auth.NewUser) error {
 }
 
 func (uc *Usecase) Login(i auth.LoginInfo) (models.User, error) {
-	//TODO implement me
-	panic("implement me")
+	// check user exist
+	// compare password & hash
+	// generate token & updated to the Db
+	// return User
 }
