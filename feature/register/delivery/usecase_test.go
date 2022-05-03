@@ -41,12 +41,27 @@ func (m *MockedPasswordValidator) Validate(s string) bool {
 	return args.Bool(0)
 }
 
+type MockedHashValidator struct {
+	mock.Mock
+}
+
+func (m *MockedHashValidator) Hash(s string) (string, error) {
+	args := m.Called(s)
+	return args.String(0), args.Error(1)
+}
+
+func (m *MockedHashValidator) Compare(s string, h string) bool {
+	args := m.Called(s, h)
+	return args.Bool(0)
+}
+
 type RegisterUsecaseTestSuite struct {
 	suite.Suite
-	uc   register.Usecase
-	repo *MockedRegisterRepo
-	pv   *MockedPasswordValidator
-	ev   *MockedEmailValidator
+	uc    register.Usecase
+	repo  *MockedRegisterRepo
+	pv    *MockedPasswordValidator
+	ev    *MockedEmailValidator
+	hashv *MockedHashValidator
 }
 
 func TestNewRegisterUsecase(t *testing.T) {
@@ -58,7 +73,8 @@ func (s *RegisterUsecaseTestSuite) SetupTest() {
 	s.repo = new(MockedRegisterRepo)
 	s.pv = new(MockedPasswordValidator)
 	s.ev = new(MockedEmailValidator)
-	s.uc = NewRegisterUsecase(l, s.repo, s.pv, s.ev)
+	s.hashv = new(MockedHashValidator)
+	s.uc = NewRegisterUsecase(l, s.repo, s.pv, s.ev, s.hashv)
 }
 
 func (s *RegisterUsecaseTestSuite) TestRegisterInvalidEmailAddr() {
@@ -111,7 +127,7 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerError() {
 	s.Assert().Equal(exceptions.ServerError, err)
 }
 
-func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure() {
+func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorHashPasswordFailure() {
 	user := register.NewUser{
 		Email:    "123@gmail.com",
 		Password: "dfadfjklf",
@@ -119,7 +135,24 @@ func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailu
 	s.ev.On("Validate", user.Email).Return(true)
 	s.pv.On("Validate", user.Password).Return(true)
 	s.repo.On("FindUser", user.Email).Return(false, nil)
-	s.repo.On("Register", user.Email, user.Password).Return(exceptions.ServerError)
+	s.hashv.On("Hash", user.Password).Return("", exceptions.ServerError)
+	s.repo.On("Register", user.Email, user.Password).Return(nil)
+	err := s.uc.Register(user)
+
+	s.Assert().Equal(exceptions.ServerError, err)
+}
+
+func (s *RegisterUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure() {
+	user := register.NewUser{
+		Email:    "123@gmail.com",
+		Password: "dfadfjklf",
+	}
+	hash := "hashresult"
+	s.ev.On("Validate", user.Email).Return(true)
+	s.pv.On("Validate", user.Password).Return(true)
+	s.repo.On("FindUser", user.Email).Return(false, nil)
+	s.hashv.On("Hash", user.Password).Return(hash, nil)
+	s.repo.On("Register", user.Email, hash).Return(exceptions.ServerError)
 	err := s.uc.Register(user)
 
 	s.Assert().Equal(exceptions.ServerError, err)
