@@ -14,6 +14,11 @@ type MockedAuthRepo struct {
 	mock.Mock
 }
 
+func (m *MockedAuthRepo) UpdateToken(token string) error {
+	args := m.Called(token)
+	return args.Error(0)
+}
+
 func (m *MockedAuthRepo) Register(name string, email string, password string) error {
 	args := m.Called(name, email, password)
 	return args.Error(0)
