@@ -67,5 +67,6 @@ func (h *handler) login(c *gin.Context) {
 }
 
 func (h *handler) signout(c *gin.Context) {
-	c.Writer.WriteHeader(500)
+	h.registerUc.Signout()
+	c.JSON(http.StatusOK, common.Message{Message: "sign out successful"})
 }
