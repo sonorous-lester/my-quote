@@ -99,6 +99,9 @@ func (uc *Usecase) Login(i auth.Anonymous) (models.User, error) {
 }
 
 func (uc *Usecase) Signout() error {
-	uc.r.Signout()
+	err := uc.r.Signout()
+	if err != nil {
+		return exceptions.ServerError
+	}
 	return nil
 }
