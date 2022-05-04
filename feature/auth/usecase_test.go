@@ -56,13 +56,23 @@ func (m *MockedHashValidator) Compare(s string, h string) bool {
 	return args.Bool(0)
 }
 
+type MockedTokenGenerator struct {
+	mock.Mock
+}
+
+func (m *MockedTokenGenerator) New() string {
+	args := m.Called()
+	return args.String(0)
+}
+
 type AuthUsecaseTestSuite struct {
 	suite.Suite
-	uc    auth.Usecase
-	repo  *MockedAuthRepo
-	pv    *MockedPasswordValidator
-	ev    *MockedEmailValidator
-	hashv *MockedHashValidator
+	uc     auth.Usecase
+	repo   *MockedAuthRepo
+	pv     *MockedPasswordValidator
+	ev     *MockedEmailValidator
+	hashv  *MockedHashValidator
+	tokeng *MockedTokenGenerator
 }
 
 func TestNewAuthUsecase(t *testing.T) {
@@ -75,7 +85,8 @@ func (s *AuthUsecaseTestSuite) SetupTest() {
 	s.pv = new(MockedPasswordValidator)
 	s.ev = new(MockedEmailValidator)
 	s.hashv = new(MockedHashValidator)
-	s.uc = NewUsecase(l, s.repo, s.pv, s.ev, s.hashv)
+	s.tokeng = new(MockedTokenGenerator)
+	s.uc = NewUsecase(l, s.repo, s.pv, s.ev, s.hashv, s.tokeng)
 }
 
 func (s *AuthUsecaseTestSuite) TestRegisterInvalidEmailAddr() {

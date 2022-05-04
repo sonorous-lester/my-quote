@@ -9,20 +9,22 @@ import (
 )
 
 type Usecase struct {
-	l     domain.Logger
-	r     auth.Repository
-	pv    common.Validator
-	ev    common.Validator
-	hashv common.HashValidator
+	l      domain.Logger
+	r      auth.Repository
+	pv     common.Validator
+	ev     common.Validator
+	hashv  common.HashValidator
+	tokeng common.Generator
 }
 
-func NewUsecase(logger domain.Logger, repository auth.Repository, passwordValidator common.Validator, emailValidator common.Validator, hashValidator common.HashValidator) *Usecase {
+func NewUsecase(logger domain.Logger, repository auth.Repository, passwordValidator common.Validator, emailValidator common.Validator, hashValidator common.HashValidator, tokenGenerator common.Generator) *Usecase {
 	return &Usecase{
-		l:     logger,
-		r:     repository,
-		pv:    passwordValidator,
-		ev:    emailValidator,
-		hashv: hashValidator,
+		l:      logger,
+		r:      repository,
+		pv:     passwordValidator,
+		ev:     emailValidator,
+		hashv:  hashValidator,
+		tokeng: tokenGenerator,
 	}
 }
 
