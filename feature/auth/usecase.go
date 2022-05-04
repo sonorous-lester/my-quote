@@ -77,6 +77,9 @@ func (uc *Usecase) Login(i auth.LoginInfo) (models.User, error) {
 		return models.User{}, exceptions.AuthError
 	}
 	// generate token & updated to the Db
+	token := uc.tokeng.New()
+	uc.r.UpdateToken(user, token)
+
 	// return User
 	return models.User{}, nil
 }
