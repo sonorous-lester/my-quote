@@ -8,6 +8,7 @@ import (
 	"myquote/domain/models"
 	"myquote/service/logger"
 	"testing"
+	"time"
 )
 
 type MockedAuthRepo struct {
@@ -238,4 +239,33 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorExceptionWhenUpdateToken
 	s.repo.On("UpdateToken", user, token).Return(exceptions.ServerError)
 	_, err := s.uc.Login(info)
 	s.Assert().Equal(exceptions.ServerError, err)
+}
+
+func (s *AuthUsecaseTestSuite) TestLoginSuccess() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	user := models.UserModel{Password: "this is a hash"}
+	token := "this is a token"
+	member := models.User{
+		ID:        1,
+		Name:      "Lester",
+		Email:     "123@gmail.com",
+		Token:     token,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+	}
+
+	s.repo.On("FindUser", info.Email).Return(true, user, nil)
+	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.tokeng.On("New").Return(token)
+	s.repo.On("UpdateToken", user, token).Return(nil)
+	s.repo.On("FindUser", info.Email).Return(true, user, nil)
+	actual, err := s.uc.Login(info)
+
+	s.Assert().Equal(nil, err)
+	s.Assert().Equal(member.Name, actual.Name)
+	s.Assert().Equal(member.Email, actual.Email)
+	s.Assert().Equal(member.Token, actual.Token)
 }
