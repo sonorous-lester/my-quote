@@ -277,3 +277,29 @@ func (s *AuthUsecaseTestSuite) TestLoginSuccess() {
 	s.Assert().Equal(member.Email, actual.Email)
 	s.Assert().Equal(member.Token, actual.Token)
 }
+
+func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorWhenFindUserFailure() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	token := "this is a token"
+	user := models.UserModel{
+		ID:        1,
+		Name:      "Lester",
+		Email:     "123@gmail.com",
+		Password:  "this is a hash",
+		Token:     token,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+	}
+
+	s.repo.On("FindUser", info.Email).Return(true, user, nil).Once()
+	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.tokeng.On("New").Return(token)
+	s.repo.On("UpdateToken", user, token).Return(nil)
+	s.repo.On("FindUser", info.Email).Return(false, models.UserModel{}, exceptions.ServerError)
+	_, err := s.uc.Login(info)
+
+	s.Assert().Equal(exceptions.ServerError, err)
+}
