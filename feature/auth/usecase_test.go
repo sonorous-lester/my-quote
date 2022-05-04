@@ -14,8 +14,8 @@ type MockedAuthRepo struct {
 	mock.Mock
 }
 
-func (m *MockedAuthRepo) UpdateToken(token string) error {
-	args := m.Called(token)
+func (m *MockedAuthRepo) UpdateToken(user models.UserModel, token string) error {
+	args := m.Called(user, token)
 	return args.Error(0)
 }
 
@@ -206,4 +206,20 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowAuthErrorException() {
 	s.hashv.On("Compare", info.Password, user.Password).Return(false)
 	_, err := s.uc.Login(info)
 	s.Assert().Equal(exceptions.AuthError, err)
+}
+
+func (s *AuthUsecaseTestSuite) TestLoginUpdateTokenSuccess() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	user := models.UserModel{Password: "this is a hash"}
+	token := "this is a token"
+
+	s.repo.On("FindUser", info.Email).Return(true, user, nil)
+	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.tokeng.On("New").Return(token)
+	s.repo.On("UpdateToken", user, token).Return(nil)
+	_, err := s.uc.Login(info)
+	s.Assert().Equal(nil, err)
 }
