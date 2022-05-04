@@ -15,6 +15,11 @@ type MockedAuthRepo struct {
 	mock.Mock
 }
 
+func (m *MockedAuthRepo) Signout() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockedAuthRepo) UpdateToken(user models.UserModel, token string) error {
 	args := m.Called(user, token)
 	return args.Error(0)
@@ -302,4 +307,10 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorWhenFindUserFailure() {
 	_, err := s.uc.Login(info)
 
 	s.Assert().Equal(exceptions.ServerError, err)
+}
+
+func (s *AuthUsecaseTestSuite) TestSignoutSuccess() {
+	s.repo.On("Signout").Return(nil)
+	err := s.uc.Signout()
+	s.Assert().Equal(nil, err)
 }

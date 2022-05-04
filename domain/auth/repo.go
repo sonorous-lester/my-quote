@@ -5,5 +5,6 @@ import "myquote/domain/models"
 type Repository interface {
 	FindUser(email string) (bool, models.UserModel, error)
 	Register(name string, email string, password string) error
+	Signout() error
 	UpdateToken(user models.UserModel, token string) error
 }
