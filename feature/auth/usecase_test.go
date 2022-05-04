@@ -223,3 +223,19 @@ func (s *AuthUsecaseTestSuite) TestLoginUpdateTokenSuccess() {
 	_, err := s.uc.Login(info)
 	s.Assert().Equal(nil, err)
 }
+
+func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorExceptionWhenUpdateTokenFailure() {
+	info := auth.LoginInfo{
+		Email:    "123@gmail.com",
+		Password: "123456",
+	}
+	user := models.UserModel{Password: "this is a hash"}
+	token := "this is a token"
+
+	s.repo.On("FindUser", info.Email).Return(true, user, nil)
+	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.tokeng.On("New").Return(token)
+	s.repo.On("UpdateToken", user, token).Return(exceptions.ServerError)
+	_, err := s.uc.Login(info)
+	s.Assert().Equal(exceptions.ServerError, err)
+}
