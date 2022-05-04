@@ -82,6 +82,15 @@ func (uc *Usecase) Login(i auth.LoginInfo) (models.User, error) {
 	if err != nil {
 		return models.User{}, exceptions.ServerError
 	}
-	// return User
-	return models.User{}, nil
+
+	_, userWithToken, _ := uc.r.FindUser(i.Email)
+
+	return models.User{
+		ID:        userWithToken.ID,
+		Name:      userWithToken.Name,
+		Email:     userWithToken.Email,
+		Token:     userWithToken.Token,
+		CreatedAt: userWithToken.CreatedAt,
+		UpdatedAt: userWithToken.UpdatedAt,
+	}, nil
 }
