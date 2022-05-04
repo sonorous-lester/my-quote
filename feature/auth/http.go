@@ -67,6 +67,10 @@ func (h *handler) login(c *gin.Context) {
 }
 
 func (h *handler) signout(c *gin.Context) {
-	h.registerUc.Signout()
+	err := h.registerUc.Signout()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, common.Message{Message: err.Error()})
+		return
+	}
 	c.JSON(http.StatusOK, common.Message{Message: "sign out successful"})
 }
