@@ -27,7 +27,7 @@ func (m *MockedAuthUsecase) Register(user auth.NewUser) error {
 	return args.Error(0)
 }
 
-func (m *MockedAuthUsecase) Login(i auth.LoginInfo) (models.User, error) {
+func (m *MockedAuthUsecase) Login(i auth.Anonymous) (models.User, error) {
 	args := m.Called(i)
 	return args.Get(0).(models.User), args.Error(1)
 }
@@ -100,7 +100,7 @@ func (s *AuthTestSuite) TestRegisterShowInvalidMessage() {
 }
 
 func (s *AuthTestSuite) TestLoginSuccess() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
@@ -141,7 +141,7 @@ func (s *AuthTestSuite) TestShowLoginInvalidInputException() {
 }
 
 func (s *AuthTestSuite) TestLoginShowBadRequestException() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
@@ -159,7 +159,7 @@ func (s *AuthTestSuite) TestLoginShowBadRequestException() {
 }
 
 func (s *AuthTestSuite) TestLoginShowServerErrorException() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}

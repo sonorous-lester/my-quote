@@ -177,7 +177,7 @@ func (s *AuthUsecaseTestSuite) TestRegisterThrowServerErrorWhenRegisterFailure()
 }
 
 func (s *AuthUsecaseTestSuite) TestLoginThrowUserNotExistException() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
@@ -187,7 +187,7 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowUserNotExistException() {
 }
 
 func (s *AuthUsecaseTestSuite) TestLoginThrowUserServerErrorException() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
@@ -197,28 +197,28 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowUserServerErrorException() {
 }
 
 func (s *AuthUsecaseTestSuite) TestLoginThrowAuthErrorException() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
-	user := models.UserModel{Password: "this is a hash"}
+	user := models.UserModel{Hashed: "this is a hash"}
 
 	s.repo.On("FindUser", info.Email).Return(true, user, nil)
-	s.hashv.On("Compare", info.Password, user.Password).Return(false)
+	s.hashv.On("Compare", info.Password, user.Hashed).Return(false)
 	_, err := s.uc.Login(info)
 	s.Assert().Equal(exceptions.AuthError, err)
 }
 
 func (s *AuthUsecaseTestSuite) TestLoginUpdateTokenSuccess() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
-	user := models.UserModel{Password: "this is a hash"}
+	user := models.UserModel{Hashed: "this is a hash"}
 	token := "this is a token"
 
 	s.repo.On("FindUser", info.Email).Return(true, user, nil)
-	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.hashv.On("Compare", info.Password, user.Hashed).Return(true)
 	s.tokeng.On("New").Return(token)
 	s.repo.On("UpdateToken", user, token).Return(nil)
 	_, err := s.uc.Login(info)
@@ -226,15 +226,15 @@ func (s *AuthUsecaseTestSuite) TestLoginUpdateTokenSuccess() {
 }
 
 func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorExceptionWhenUpdateTokenFailure() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
-	user := models.UserModel{Password: "this is a hash"}
+	user := models.UserModel{Hashed: "this is a hash"}
 	token := "this is a token"
 
 	s.repo.On("FindUser", info.Email).Return(true, user, nil)
-	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.hashv.On("Compare", info.Password, user.Hashed).Return(true)
 	s.tokeng.On("New").Return(token)
 	s.repo.On("UpdateToken", user, token).Return(exceptions.ServerError)
 	_, err := s.uc.Login(info)
@@ -242,7 +242,7 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorExceptionWhenUpdateToken
 }
 
 func (s *AuthUsecaseTestSuite) TestLoginSuccess() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
@@ -251,7 +251,7 @@ func (s *AuthUsecaseTestSuite) TestLoginSuccess() {
 		ID:        1,
 		Name:      "Lester",
 		Email:     "123@gmail.com",
-		Password:  "this is a hash",
+		Hashed:    "this is a hash",
 		Token:     token,
 		CreatedAt: time.Time{},
 		UpdatedAt: time.Time{},
@@ -266,7 +266,7 @@ func (s *AuthUsecaseTestSuite) TestLoginSuccess() {
 	}
 
 	s.repo.On("FindUser", info.Email).Return(true, user, nil)
-	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.hashv.On("Compare", info.Password, user.Hashed).Return(true)
 	s.tokeng.On("New").Return(token)
 	s.repo.On("UpdateToken", user, token).Return(nil)
 	s.repo.On("FindUser", info.Email).Return(true, user, nil)
@@ -279,7 +279,7 @@ func (s *AuthUsecaseTestSuite) TestLoginSuccess() {
 }
 
 func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorWhenFindUserFailure() {
-	info := auth.LoginInfo{
+	info := auth.Anonymous{
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
@@ -288,14 +288,14 @@ func (s *AuthUsecaseTestSuite) TestLoginThrowServerErrorWhenFindUserFailure() {
 		ID:        1,
 		Name:      "Lester",
 		Email:     "123@gmail.com",
-		Password:  "this is a hash",
+		Hashed:    "this is a hash",
 		Token:     token,
 		CreatedAt: time.Time{},
 		UpdatedAt: time.Time{},
 	}
 
 	s.repo.On("FindUser", info.Email).Return(true, user, nil).Once()
-	s.hashv.On("Compare", info.Password, user.Password).Return(true)
+	s.hashv.On("Compare", info.Password, user.Hashed).Return(true)
 	s.tokeng.On("New").Return(token)
 	s.repo.On("UpdateToken", user, token).Return(nil)
 	s.repo.On("FindUser", info.Email).Return(false, models.UserModel{}, exceptions.ServerError)

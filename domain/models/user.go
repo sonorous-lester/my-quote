@@ -7,9 +7,9 @@ import (
 type UserModel struct {
 	ID        int64
 	Name      string
-	Email     string
-	Password  string
-	Token     string
+	Email  string
+	Hashed string
+	Token  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

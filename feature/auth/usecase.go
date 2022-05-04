@@ -60,40 +60,40 @@ func (uc *Usecase) Register(user auth.NewUser) error {
 	return nil
 }
 
-func (uc *Usecase) Login(i auth.LoginInfo) (models.User, error) {
-	find, user, err := uc.r.FindUser(i.Email)
+func (uc *Usecase) Login(i auth.Anonymous) (models.User, error) {
+	find, u, err := uc.r.FindUser(i.Email)
 	if !find {
-		uc.l.Warnf("not found user. email: %s", i.Email)
+		uc.l.Warnf("not found u. email: %s", i.Email)
 		return models.User{}, exceptions.UserNotExists
 	}
 	if err != nil {
-		uc.l.Debugf("find user error when user login.\n message: %s", err.Error())
+		uc.l.Debugf("find u error when u login.\n message: %s", err.Error())
 		return models.User{}, exceptions.ServerError
 	}
 	//compare password & hash
-	matched := uc.hashv.Compare(i.Password, user.Password)
+	matched := uc.hashv.Compare(i.Password, u.Hashed)
 	if !matched {
-		uc.l.Warnf("user(%s)'s password hash is not matched.", i.Email)
+		uc.l.Warnf("u(%s)'s password hash is not matched.", i.Email)
 		return models.User{}, exceptions.AuthError
 	}
 	// generate token & updated to the Db
 	token := uc.tokeng.New()
-	err = uc.r.UpdateToken(user, token)
+	err = uc.r.UpdateToken(u, token)
 	if err != nil {
 		return models.User{}, exceptions.ServerError
 	}
 
-	_, userWithToken, err := uc.r.FindUser(i.Email)
+	_, user, err := uc.r.FindUser(i.Email)
 	if err != nil {
 		return models.User{}, exceptions.ServerError
 	}
 
 	return models.User{
-		ID:        userWithToken.ID,
-		Name:      userWithToken.Name,
-		Email:     userWithToken.Email,
-		Token:     userWithToken.Token,
-		CreatedAt: userWithToken.CreatedAt,
-		UpdatedAt: userWithToken.UpdatedAt,
+		ID:        user.ID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Token:     user.Token,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}, nil
 }
