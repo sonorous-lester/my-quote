@@ -314,3 +314,9 @@ func (s *AuthUsecaseTestSuite) TestSignoutSuccess() {
 	err := s.uc.Signout()
 	s.Assert().Equal(nil, err)
 }
+
+func (s *AuthUsecaseTestSuite) TestSignoutReturnServerErrorWhenFailure() {
+	s.repo.On("Signout").Return(exceptions.ServerError)
+	err := s.uc.Signout()
+	s.Assert().Equal(exceptions.ServerError, err)
+}
