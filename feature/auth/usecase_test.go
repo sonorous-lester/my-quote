@@ -246,8 +246,16 @@ func (s *AuthUsecaseTestSuite) TestLoginSuccess() {
 		Email:    "123@gmail.com",
 		Password: "123456",
 	}
-	user := models.UserModel{Password: "this is a hash"}
 	token := "this is a token"
+	user := models.UserModel{
+		ID:        1,
+		Name:      "Lester",
+		Email:     "123@gmail.com",
+		Password:  "this is a hash",
+		Token:     token,
+		CreatedAt: time.Time{},
+		UpdatedAt: time.Time{},
+	}
 	member := models.User{
 		ID:        1,
 		Name:      "Lester",
