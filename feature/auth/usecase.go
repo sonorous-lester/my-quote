@@ -17,11 +17,6 @@ type Usecase struct {
 	tokeng common.Generator
 }
 
-func (uc *Usecase) Signout() error {
-	//TODO implement me
-	panic("implement me")
-}
-
 func NewUsecase(logger domain.Logger, repository auth.Repository, passwordValidator common.Validator, emailValidator common.Validator, hashValidator common.HashValidator, tokenGenerator common.Generator) *Usecase {
 	return &Usecase{
 		l:      logger,
@@ -101,4 +96,9 @@ func (uc *Usecase) Login(i auth.Anonymous) (models.User, error) {
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}, nil
+}
+
+func (uc *Usecase) Signout() error {
+	uc.r.Signout()
+	return nil
 }
