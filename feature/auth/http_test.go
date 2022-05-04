@@ -188,3 +188,11 @@ func (s *AuthTestSuite) TestSignoutSuccess() {
 	s.g.ServeHTTP(s.r, req)
 	s.Assert().Equal(http.StatusOK, s.r.Code)
 }
+
+func (s *AuthTestSuite) TestRespondServerErrorWhenSignoutFailure() {
+	s.uc.On("Signout").Return(exceptions.ServerError)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
+	req, _ := newTestRequest(http.MethodPost, SIGNOUT_ENDPOINT, nil)
+	s.g.ServeHTTP(s.r, req)
+	s.Assert().Equal(http.StatusInternalServerError, s.r.Code)
+}
