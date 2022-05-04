@@ -1,13 +1,15 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type UserModel struct {
 	ID        int64
 	Name      string
 	Email     string
 	Password  string
-	Token     *string
+	Token     string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
