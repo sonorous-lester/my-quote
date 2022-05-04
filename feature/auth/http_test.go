@@ -22,6 +22,11 @@ type MockedAuthUsecase struct {
 	mock.Mock
 }
 
+func (m *MockedAuthUsecase) Signout() error {
+	args := m.Called()
+	return args.Error(0)
+}
+
 func (m *MockedAuthUsecase) Register(user auth.NewUser) error {
 	args := m.Called(user)
 	return args.Error(0)
@@ -174,4 +179,12 @@ func (s *AuthTestSuite) TestLoginShowServerErrorException() {
 	json.Unmarshal(s.r.Body.Bytes(), &m)
 	s.Assert().Equal(http.StatusInternalServerError, s.r.Code)
 	s.Assert().Equal(exceptions.ServerError.Error(), m.Message)
+}
+
+func (s *AuthTestSuite) TestSignoutSuccess() {
+	s.uc.On("Signout").Return(nil)
+	NewAuthHTTPHandler(s.g, s.l, s.uc)
+	req, _ := newTestRequest(http.MethodPost, SIGNOUT_ENDPOINT, nil)
+	s.g.ServeHTTP(s.r, req)
+	s.Assert().Equal(http.StatusOK, s.r.Code)
 }

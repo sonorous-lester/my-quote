@@ -17,6 +17,11 @@ type Usecase struct {
 	tokeng common.Generator
 }
 
+func (uc *Usecase) Signout() error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewUsecase(logger domain.Logger, repository auth.Repository, passwordValidator common.Validator, emailValidator common.Validator, hashValidator common.HashValidator, tokenGenerator common.Generator) *Usecase {
 	return &Usecase{
 		l:      logger,
